@@ -1,6 +1,4 @@
 import { betterAuth } from "better-auth";
-import { googleAuth } from "better-auth/social-providers/google";
-import { passwordReset } from "better-auth/plugins/password-reset";
 
 import { pool } from "./db.js";
 import { env } from "./env.js";
@@ -27,7 +25,10 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    minPasswordLength: 8
+    minPasswordLength: 8,
+    sendResetPassword: async ({ url, user }) => {
+      console.log("Password Reset Email:", user.email, url);
+    }
   },
   emailVerification: {
     sendOnSignUp: true,
@@ -37,14 +38,9 @@ export const auth = betterAuth({
     }
   },
   socialProviders: {
-    google: () => googleAuth({
+    google: {
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-    })
-  },
-  passwordReset: {
-    sendResetEmail: async ({ url, email }) => {
-      console.log("Password Reset Email:", email, url);
     }
   }
 });
