@@ -21,5 +21,17 @@ export const auth = betterAuth({
       maxAge: 300,
       strategy: "compact"
     }
+  },
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: true,
+    minPasswordLength: 8
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ url }) => {
+      console.log("Verification Email:", url);
+    }
   }
 });
