@@ -9,13 +9,18 @@ export const corsOrigins = env.CORS_ORIGIN
 
 export const rateLimit = {
   enabled: true,
+  storage: "database",
   window: 10,
   max: 100,
   customRules: {
-    "/sign-in/email": {
-      window: 10,
-      max: 100
-    }
+    "/sign-in/email": { window: 60, max: 10 },
+    "/sign-up/email": { window: 60, max: 5 },
+    "/forget-password": { window: 60, max: 3 },
+    "/reset-password": { window: 60, max: 3 },
+    "/send-verification-email": { window: 60, max: 3 },
+    "/get-session": { window: 60, max: 120 },
+    "/update-user": { window: 60, max: 30 },
+    "/sign-out": { window: 60, max: 30 }
   }
 } as const;
 
