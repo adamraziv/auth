@@ -31,6 +31,22 @@ Required variables include:
 npm run dev
 npm run typecheck
 npm run build
+npm run test
+npm run test:integration
+npm run test:coverage
+```
+
+### Full Test Suite
+
+Run all tests including integration and coverage:
+
+```bash
+npm test && npm run typecheck && npm run test:integration && npm run test:coverage
+```
+
+Or via proxy:
+```bash
+rtk proxy bash -lc 'cd auth && npm test && npm run typecheck && npm run test:integration && npm run test:coverage'
 ```
 
 ## Migrate Better Auth Schema
@@ -66,6 +82,53 @@ npm run auth:migrate
 | /api/auth/reset-password/confirm | POST | Confirm new password |
 
 > **Note:** Password reset emails are logged to console in development (matching email verification behavior).
+
+### Manual/Provider-Backed OAuth Verification
+
+Full Google OAuth login (AUTH-05) and same-email account linking (AUTH-06) require real Google credentials and are **manual/provider-backed** verification.
+
+**Automated tests verify:**
+- Google OAuth configuration in auth.ts (`socialProviders`, `clientId`, `clientSecret`)
+- OAuth initiation endpoint responds (config/initiation only, not callback)
+
+**Manual verification steps for AUTH-05 and AUTH-06:**
+
+1. Configure real Google OAuth credentials:
+   ```bash
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   ```
+
+2. Register redirect URI in Google Cloud Console OAuth client:
+   - `{BETTER_AUTH_URL}/api/auth/callback/google`
+
+3. Run automated config/initiation checks:
+   ```bash
+   rtk proxy bash -lc 'cd auth && npm run test:integration -- oauth'
+   ```
+
+4. Complete Google sign-in in a browser:
+   - Visit consumer app sign-in page
+   - Click "Sign in with Google"
+   - Complete Google account selection
+
+5. Verify session after OAuth callback:
+   ```bash
+   curl -v http://localhost:3000/api/auth/get-session \
+     -H "Cookie: better-auth.session_info=your_session_cookie"
+   ```
+   - Should return user object with `email`, `name`, `image` fields
+
+6. For AUTH-06 (account linking):
+   - Sign up with email/password using a Google-associated email
+   - Verify email
+   - Complete Google sign-in with same email
+   - Verify same user identity is reused (not duplicated)
+
+**If no real Google credentials available:**
+- AUTH-05 and AUTH-06 remain `manual-provider-backed`
+- They are verified through the automated config/initiation tests above
+- A future deterministic mock OIDC provider could automate this
 
 ## Downstream Session Validation
 

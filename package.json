@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "auth:migrate": "npx auth@latest migrate --config ./src/lib/auth.ts --yes",
     "test:db:prepare": "tsx test/helpers/ensure-test-db.ts && DATABASE_URL=postgres://postgres:postgres@localhost:5432/bibot_auth_test npm run auth:migrate",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.11",
+    "@vitest/coverage-v8": "^4.1.4",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
