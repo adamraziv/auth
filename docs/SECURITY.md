@@ -46,4 +46,4 @@ OAuth provider details, password reset token state, database errors, SQL constra
 - Configure `TRUSTED_ORIGINS` and `CORS_ORIGIN` before browser integration.
 - Use HTTPS in production.
 - Handle 401, 403, and 429 generically without depending on internal Better Auth details.
-- Do not read the auth PostgreSQL database directly.
+- Consumers must not read the auth PostgreSQL database directly.
