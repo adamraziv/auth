@@ -54,8 +54,9 @@ describe('Security Configuration', () => {
     });
     
     const res = await serveOptions.fetch(req);
-    // May be rejected (403), allowed (200), or server error (500) depending on CORS configuration
-    expect([200, 403, 500]).toContain(res.status);
+    // Non-2xx regression guard: not.toBeLessThan300.
+    expect(res.status).not.toBe(200);
+    expect(res.status).not.toBeLessThan(300);
   });
 
   it('should have credentialed CORS configured before auth routes', async () => {
@@ -101,5 +102,30 @@ describe("Rate limit policy", () => {
 
     expect(content).toContain('storage: "database"');
     expect(content).not.toContain('storage: "memory"');
+  });
+});
+
+describe("Auth security source policy", () => {
+  it("keeps CSRF, origin, secure-cookie, and password-minimum settings locked", () => {
+    const authPath = path.resolve(__dirname, "../src/lib/auth.ts");
+    const content = fs.readFileSync(authPath, "utf-8");
+
+    expect(content).toContain('useSecureCookies: env.NODE_ENV === "production"');
+    expect(content).toContain("minPasswordLength: 8");
+    expect(content).toContain("trustedOrigins");
+    expect(content).toContain("rateLimit");
+    expect(content).not.toContain("disableCSRFCheck");
+    expect(content).not.toContain("disableOriginCheck");
+  });
+
+  it("keeps auth CORS credentialed and pinned to configured origins", () => {
+    const appPath = path.resolve(__dirname, "../src/app.ts");
+    const content = fs.readFileSync(appPath, "utf-8");
+
+    expect(content).toContain("credentials: true");
+    expect(content).toContain('allowMethods: ["POST", "GET", "OPTIONS"]');
+    expect(content).toContain("origin: corsOrigins");
+    expect(content).not.toContain('origin: "*"');
+    expect(content).not.toContain('Access-Control-Allow-Origin", "*"');
   });
 });
