@@ -9,7 +9,9 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "auth:migrate": "npx auth@latest migrate --config ./src/lib/auth.ts --yes"
+    "auth:migrate": "npx auth@latest migrate --config ./src/lib/auth.ts --yes",
+    "test:db:prepare": "tsx test/helpers/ensure-test-db.ts && DATABASE_URL=postgres://postgres:postgres@localhost:5432/bibot_auth_test npm run auth:migrate",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",

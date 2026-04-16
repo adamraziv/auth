@@ -156,10 +156,10 @@ describe("Session validation boundary", () => {
     serveOptions = vi.mocked(honoNodeServer.serve).mock.calls[0][0];
   });
 
-  // Security regression: auth/src/index.ts should have the Better Auth wildcard mount
+  // Security regression: auth/src/app.ts should have the Better Auth wildcard mount
   it("should have Better Auth wildcard mount at /api/auth/*", () => {
-    const indexPath = path.resolve(__dirname, "../src/index.ts");
-    const content = fs.readFileSync(indexPath, "utf-8");
+    const appPath = path.resolve(__dirname, "../src/app.ts");
+    const content = fs.readFileSync(appPath, "utf-8");
     // Verify the mount pattern exists
     expect(content).toContain('app.on(["POST", "GET"], "/api/auth/*"');
   });
