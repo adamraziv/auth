@@ -134,6 +134,10 @@ Full Google OAuth login (AUTH-05) and same-email account linking (AUTH-06) requi
 
 Downstream services validate sessions by calling GET /api/auth/get-session over HTTP and forwarding the incoming Cookie header and relevant request headers. Downstream services must not read the auth PostgreSQL database directly for session validation.
 
+## Security Posture
+
+Security posture, public rate limits, secure-cookie requirements, trusted-origin behavior, and approved public error responses are documented in [docs/SECURITY.md](docs/SECURITY.md).
+
 ### Endpoints
 
 | Endpoint | Method | Consumer use |
