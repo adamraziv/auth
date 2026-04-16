@@ -10,7 +10,13 @@ export const corsOrigins = env.CORS_ORIGIN
 export const rateLimit = {
   enabled: true,
   window: 10,
-  max: 100
+  max: 100,
+  customRules: {
+    "/sign-in/email": {
+      window: 10,
+      max: 100
+    }
+  }
 } as const;
 
 export const ipAddressHeaders = ["x-forwarded-for", "x-real-ip"] as const;

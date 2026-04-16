@@ -63,14 +63,15 @@ describe("email/password auth lifecycle", () => {
       headers: jar.headers({ Origin: origin })
     }));
     expect(signout.status).toBe(200);
+    jar.store(signout);
 
     const revokedSession = await getSession(jar);
     if (revokedSession.status === 401) {
       expect(revokedSession.status).toBe(401);
     } else {
       expect(revokedSession.status).toBe(200);
-      const revokedBody = await revokedSession.json() as { user?: unknown };
-      expect(revokedBody.user).toBeFalsy();
+      const revokedBody = await revokedSession.json() as { user?: unknown } | null;
+      expect(revokedBody?.user).toBeFalsy();
     }
   });
 
