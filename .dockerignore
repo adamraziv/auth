@@ -1,0 +1,54 @@
+# Dependencies
+node_modules
+
+# Build output (will be generated in container)
+dist
+
+# Version control
+.git
+.gitignore
+
+# Environment files (use runtime env vars)
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Test files
+test
+tests
+*.test.ts
+*.spec.ts
+*.test.js
+*.spec.js
+__tests__
+coverage
+
+# Editor/IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+
+# GSD/Planning files
+.claude
+.planning
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Misc
+.eslintcache
+.prettierrc
+.prettierignore
