@@ -1,6 +1,6 @@
-import type { auth } from "../lib/auth.js";
+import type { PublicUser, PublicSessionRecord } from "./auth-contract.js";
 
 export type AppVariables = {
-  user: typeof auth.$Infer.Session.user | null;
-  session: typeof auth.$Infer.Session.session | null;
+  user: PublicUser | null;
+  session: PublicSessionRecord | null;
 };

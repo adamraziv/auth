@@ -22,6 +22,16 @@ export const auth = betterAuth({
       strategy: "compact"
     }
   },
+  user: {
+    additionalFields: {
+      role: {
+        type: ["user", "admin"],
+        required: false,
+        defaultValue: "user",
+        input: false
+      }
+    }
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
