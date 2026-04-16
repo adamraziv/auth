@@ -88,3 +88,79 @@ A valid session response contains Better Auth session data and user data. A miss
 The public user profile fields are id, email, name, image, and role. The image field is the avatar URL field. Role values are user and admin; new users default to user. Clients must not send role in signup or update-user payloads.
 
 Use POST /api/auth/update-user with JSON fields name and image for profile updates. For freshness-sensitive server-side checks, call Better Auth server APIs with disableCookieCache: true rather than reading the database directly.
+
+## Docker Deployment
+
+The auth service can be run as a Docker container with PostgreSQL.
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- Generated BETTER_AUTH_SECRET (32+ character random string)
+
+### Quick Start
+
+1. **Configure environment:**
+   ```bash
+   cp auth/.env.docker auth/.env
+   # Edit auth/.env and set a secure BETTER_AUTH_SECRET
+   # Generate one with: openssl rand -base64 32
+   ```
+
+2. **Start services:**
+   ```bash
+   docker compose up -d
+   ```
+
+3. **Run database migrations:**
+   ```bash
+   docker compose exec auth npm run auth:migrate
+   ```
+
+4. **Verify health:**
+   ```bash
+   curl http://localhost:3000/api/auth/ok
+   ```
+
+5. **View logs:**
+   ```bash
+   docker compose logs -f auth
+   ```
+
+### Stopping
+
+```bash
+docker compose down
+```
+
+To also remove the PostgreSQL volume (destroys all data):
+```bash
+docker compose down -v
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| BETTER_AUTH_SECRET | Yes | 32+ character random secret for session signing |
+| DATABASE_URL | Yes | PostgreSQL connection string |
+| CORS_ORIGIN | No | Frontend origin for CORS (default: http://localhost:3001) |
+| TRUSTED_ORIGINS | No | Comma-separated trusted origins (default: http://localhost:3000) |
+| GOOGLE_CLIENT_ID | No | Google OAuth client ID |
+| GOOGLE_CLIENT_SECRET | No | Google OAuth client secret |
+
+### Health Checks
+
+The service exposes a health check endpoint:
+```
+GET /api/auth/ok
+```
+
+Returns `200 OK` with JSON:
+```json
+{
+  "status": "ok",
+  "service": "bibot-auth",
+  "timestamp": "2026-04-16T10:00:00.000Z"
+}
+```
