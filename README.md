@@ -216,9 +216,18 @@ docker compose down -v
 | GOOGLE_CLIENT_ID | No | Google OAuth client ID |
 | GOOGLE_CLIENT_SECRET | No | Google OAuth client secret |
 
+### API Reference (Scalar)
+
+A human-readable API reference is available at:
+```
+GET /api/auth/reference
+```
+
+This serves the Better Auth OpenAPI specification via Scalar UI.
+
 ### Health Checks
 
-The service exposes a health check endpoint:
+The service also exposes a health check endpoint:
 ```
 GET /api/auth/ok
 ```

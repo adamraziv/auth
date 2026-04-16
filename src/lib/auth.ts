@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { openAPI } from "better-auth/plugins";
 
 import { pool } from "./db.js";
 import { env } from "./env.js";
@@ -57,5 +58,8 @@ export const auth = betterAuth({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     }
-  }
+  },
+  plugins: [
+    openAPI()
+  ]
 });
