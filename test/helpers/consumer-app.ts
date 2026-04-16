@@ -21,8 +21,11 @@ export function createConsumerApp(options: ConsumerAppOptions): Hono {
       headers.set("Authorization", authorization);
     }
 
+    const sessionUrl = new URL("/api/auth/get-session", options.authBaseUrl);
+    sessionUrl.searchParams.set("disableCookieCache", "true");
+
     const authResponse = await (options.fetchAuth ?? fetch)(
-      new URL("/api/auth/get-session", options.authBaseUrl),
+      sessionUrl,
       {
         method: "GET",
         headers

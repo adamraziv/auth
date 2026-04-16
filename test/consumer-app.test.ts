@@ -47,7 +47,7 @@ describe("consumer app helper", () => {
     });
     expect(calls).toEqual([
       {
-        url: "http://auth.local/api/auth/get-session",
+        url: "http://auth.local/api/auth/get-session?disableCookieCache=true",
         cookie: "better-auth.session_token=abc",
         authorization: "Bearer token"
       }
