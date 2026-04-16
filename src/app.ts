@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import { auth } from "./lib/auth.js";
-import { corsOrigins } from "./lib/security.js";
+import { corsOrigins, redactAuthErrorResponse } from "./lib/security.js";
 import type { AppVariables } from "./types/hono.js";
 
 const app = new Hono<{ Variables: AppVariables }>();
@@ -25,7 +25,7 @@ app.get("/api/auth/ok", (c) => {
   }, 200);
 });
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET"], "/api/auth/*", async (c) => redactAuthErrorResponse(c.req.raw, await auth.handler(c.req.raw)));
 
 app.get("/", (c) => c.text("Auth service is healthy"));
 

@@ -9,6 +9,11 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   trustedOrigins,
   rateLimit,
+  onAPIError: {
+    onError: (error) => {
+      console.error("Auth API error", error);
+    }
+  },
   advanced: {
     useSecureCookies: env.NODE_ENV === "production",
     ipAddress: {
