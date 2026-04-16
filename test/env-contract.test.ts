@@ -14,5 +14,7 @@ describe('Environment Contract', () => {
     expect(content).toContain('BETTER_AUTH_SECRET=');
     expect(content).toContain('BETTER_AUTH_URL=');
     expect(content).toContain('DATABASE_URL=');
+    expect(content).toContain('GOOGLE_CLIENT_ID=');
+    expect(content).toContain('GOOGLE_CLIENT_SECRET=');
   });
 });
