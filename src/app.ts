@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { openAPI } from "better-auth/plugins";
-import { Scalar } from "@scalar/hono-api-reference";
 
 import { auth } from "./lib/auth.js";
 import { corsOrigins, redactAuthErrorResponse } from "./lib/security.js";
@@ -48,12 +47,5 @@ app.get("/api/auth/reference", async (c) => {
     headers: { "content-type": "text/html" }
   });
 });
-
-app.get("/docs", Scalar({
-  pageTitle: "Bibot Auth API Reference",
-  spec: {
-    url: "/api/auth/open-api/generate-schema"
-  }
-}));
 
 export { app };
