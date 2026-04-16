@@ -41,6 +41,65 @@ describe("security hardening", () => {
   });
 });
 
+describe("security hardening error redaction", () => {
+  it("returns generic OAuth callback errors", async () => {
+    const response = await app.fetch(new Request(
+      `${baseUrl}/api/auth/callback/google?error=access_denied&error_description=provider-secret-detail`,
+      {
+        method: "GET",
+        headers: { Origin: origin }
+      }
+    ));
+
+    expect([400, 401]).toContain(response.status);
+    const body = await response.text();
+    expect(body).toMatch(/Authentication failed|AUTHENTICATION_FAILED/);
+
+    expectNoSensitiveTerms(body, [
+      "google",
+      "provider-secret-detail",
+      "access_denied",
+      "error_description",
+      "token",
+      "stack",
+      "postgres",
+      "constraint",
+      "relation"
+    ]);
+  });
+
+  it("returns generic invalid reset link errors", async () => {
+    const response = await app.fetch(new Request(
+      `${baseUrl}/api/auth/reset-password/confirm?token=fake-expired-token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: origin
+        },
+        body: JSON.stringify({ password: "newpassword123" })
+      }
+    ));
+
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect(response.status).toBeLessThan(500);
+
+    const body = await response.text();
+    expect(body).toMatch(/Invalid or expired reset link|INVALID_RESET_LINK/);
+
+    expectNoSensitiveTerms(body, [
+      "fake-expired-token",
+      "expired token",
+      "token valid",
+      "user",
+      "postgres",
+      "constraint",
+      "relation",
+      "stack"
+    ]);
+  });
+});
+
 async function exceedSignUpLimit(forwardedFor: string) {
   const responses: Response[] = [];
 
@@ -76,6 +135,18 @@ function expectNoSensitiveRateLimitLeak(body: string) {
 
   for (const sensitive of ["database", "postgres", "relation", "constraint", "stack", "ratelimit", "rate_limit"]) {
     expect(lowerBody).not.toContain(sensitive);
+  }
+}
+
+function expectNoSensitiveTerms(body: string, terms: string[]) {
+  const lowerBody = body.toLowerCase();
+
+  expect(lowerBody).not.toContain("postgres");
+  expect(lowerBody).not.toContain("stack");
+  expect(lowerBody).not.toContain("constraint");
+
+  for (const term of terms) {
+    expect(lowerBody).not.toContain(term);
   }
 }
 

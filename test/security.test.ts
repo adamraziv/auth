@@ -128,6 +128,19 @@ describe("Auth security source policy", () => {
     expect(content).not.toContain('origin: "*"');
     expect(content).not.toContain('Access-Control-Allow-Origin", "*"');
   });
+
+  it("keeps Phase 7 public auth error messages allowlisted", () => {
+    const securityPath = path.resolve(__dirname, "../src/lib/security.ts");
+    const content = fs.readFileSync(securityPath, "utf-8");
+    const publicMessages = [...content.matchAll(/error: "([^"]+)"/g)].map((match) => match[1]);
+
+    expect(publicMessages).toEqual([
+      "Authentication failed",
+      "Invalid or expired reset link",
+      "Too many requests",
+      "Internal server error"
+    ]);
+  });
 });
 
 describe("Auth error redaction", () => {
