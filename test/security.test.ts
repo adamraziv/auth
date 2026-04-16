@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import * as honoNodeServer from '@hono/node-server';
 import pg from 'pg';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { rateLimit } from "../src/lib/security.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 vi.mock('@hono/node-server', () => ({
   serve: vi.fn(),
@@ -63,5 +71,35 @@ describe('Security Configuration', () => {
     const res = await serveOptions.fetch(req);
     expect(res.status).toBe(204);
     expect(res.headers.get('Access-Control-Allow-Credentials')).toBe('true');
+  });
+});
+
+describe("Rate limit policy", () => {
+  it("uses database-backed rate limit storage with the global SEC-01 limit", () => {
+    expect(rateLimit.enabled).toBe(true);
+    expect(rateLimit.storage).toBe("database");
+    expect(rateLimit.window).toBe(10);
+    expect(rateLimit.max).toBe(100);
+  });
+
+  it("defines explicit endpoint rate limit thresholds", () => {
+    expect(rateLimit.customRules).toEqual({
+      "/sign-in/email": { window: 60, max: 10 },
+      "/sign-up/email": { window: 60, max: 5 },
+      "/forget-password": { window: 60, max: 3 },
+      "/reset-password": { window: 60, max: 3 },
+      "/send-verification-email": { window: 60, max: 3 },
+      "/get-session": { window: 60, max: 120 },
+      "/update-user": { window: 60, max: 30 },
+      "/sign-out": { window: 60, max: 30 }
+    });
+  });
+
+  it("does not configure memory-backed rate limit storage", () => {
+    const securityPath = path.resolve(__dirname, "../src/lib/security.ts");
+    const content = fs.readFileSync(securityPath, "utf-8");
+
+    expect(content).toContain('storage: "database"');
+    expect(content).not.toContain('storage: "memory"');
   });
 });
