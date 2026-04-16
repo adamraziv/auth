@@ -66,3 +66,25 @@ npm run auth:migrate
 | /api/auth/reset-password/confirm | POST | Confirm new password |
 
 > **Note:** Password reset emails are logged to console in development (matching email verification behavior).
+
+## Downstream Session Validation
+
+Downstream services validate sessions by calling GET /api/auth/get-session over HTTP and forwarding the incoming Cookie header and relevant request headers. Downstream services must not read the auth PostgreSQL database directly for session validation.
+
+### Endpoints
+
+| Endpoint | Method | Consumer use |
+|----------|--------|--------------|
+| /api/auth/get-session | GET | Validate the forwarded browser session cookie/header and receive Better Auth `session` and `user` data |
+| /api/auth/update-user | POST | Update the authenticated user's `name` and `image` profile fields |
+| /api/auth/sign-out | POST | Revoke the current session and clear Better Auth session cookies |
+
+### Session Response Behavior
+
+A valid session response contains Better Auth session data and user data. A missing, expired, or revoked session must be treated as unauthenticated when Better Auth returns null session/user data or an unauthenticated status.
+
+### User Profile Fields
+
+The public user profile fields are id, email, name, image, and role. The image field is the avatar URL field. Role values are user and admin; new users default to user. Clients must not send role in signup or update-user payloads.
+
+Use POST /api/auth/update-user with JSON fields name and image for profile updates. For freshness-sensitive server-side checks, call Better Auth server APIs with disableCookieCache: true rather than reading the database directly.
