@@ -19,6 +19,15 @@ app.use(
   })
 );
 
+// Health check endpoint for Docker and monitoring
+app.get("/api/auth/ok", (c) => {
+  return c.json({
+    status: "ok",
+    service: "bibot-auth",
+    timestamp: new Date().toISOString()
+  }, 200);
+});
+
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.get("/", (c) => c.text("Auth service is healthy"));
