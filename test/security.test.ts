@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { rateLimit } from "../src/lib/security.js";
+import { rateLimit, redactAuthErrorResponse } from "../src/lib/security.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -129,3 +129,70 @@ describe("Auth security source policy", () => {
     expect(content).not.toContain('Access-Control-Allow-Origin", "*"');
   });
 });
+
+describe("Auth error redaction", () => {
+  const sensitiveTerms = ["google", "provider", "token", "postgres", "constraint", "relation", "stack"];
+
+  it("returns generic OAuth errors", async () => {
+    const response = await redactAuthErrorResponse(
+      new Request("http://localhost:3000/api/auth/callback/google"),
+      Response.json({ error: "google provider token stack" }, { status: 400 })
+    );
+
+    expect(response.status).toBe(400);
+    await expectSafeBody(response, "AUTHENTICATION_FAILED", "Authentication failed", sensitiveTerms);
+  });
+
+  it("returns generic reset-password errors", async () => {
+    const response = await redactAuthErrorResponse(
+      new Request("http://localhost:3000/api/auth/reset-password/confirm?token=expired"),
+      Response.json({ error: "expired token postgres relation" }, { status: 400 })
+    );
+
+    expect(response.status).toBe(400);
+    await expectSafeBody(response, "INVALID_RESET_LINK", "Invalid or expired reset link", sensitiveTerms);
+  });
+
+  it("returns generic rate-limit errors", async () => {
+    const response = await redactAuthErrorResponse(
+      new Request("http://localhost:3000/api/auth/sign-in/email"),
+      Response.json({ error: "rate limit provider detail" }, { status: 429 })
+    );
+
+    expect(response.status).toBe(429);
+    await expectSafeBody(response, "RATE_LIMITED", "Too many requests", sensitiveTerms);
+  });
+
+  it("returns generic internal errors", async () => {
+    const response = await redactAuthErrorResponse(
+      new Request("http://localhost:3000/api/auth/sign-in/email"),
+      Response.json({ error: "postgres constraint stack" }, { status: 500 })
+    );
+
+    expect(response.status).toBe(500);
+    await expectSafeBody(response, "INTERNAL_ERROR", "Internal server error", sensitiveTerms);
+  });
+
+  it("passes through non-error responses", async () => {
+    const original = Response.json({ ok: true }, { status: 200 });
+    const response = await redactAuthErrorResponse(
+      new Request("http://localhost:3000/api/auth/sign-in/email"),
+      original
+    );
+
+    expect(response).toBe(original);
+    expect(await response.json()).toEqual({ ok: true });
+  });
+});
+
+async function expectSafeBody(response: Response, code: string, error: string, deniedTerms: string[]) {
+  expect(response.headers.get("content-type")).toContain("application/json");
+
+  const body = await response.text();
+  expect(JSON.parse(body)).toEqual({ code, error });
+
+  const lowerBody = body.toLowerCase();
+  for (const term of deniedTerms) {
+    expect(lowerBody).not.toContain(term);
+  }
+}
