@@ -30,7 +30,8 @@ describe("OAuth & Password Reset Configuration", () => {
     const content = fs.readFileSync(authPath, "utf-8");
 
     expect(content).toContain("sendResetPassword");
-    expect(content).toContain("Password Reset Email:");
+    expect(content).toContain("Password Reset Email queued for:");
+    expect(content).not.toContain("Password Reset Email:");
   });
 
   it("should include Google OAuth env vars in env.ts", () => {
