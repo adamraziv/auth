@@ -42,15 +42,15 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     minPasswordLength: 8,
-    sendResetPassword: async ({ url, user }) => {
-      console.log("Password Reset Email:", user.email, url);
+    sendResetPassword: async ({ user }) => {
+      console.log("Password Reset Email queued for:", user.email);
     }
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ url }) => {
-      console.log("Verification Email:", url);
+    sendVerificationEmail: async ({ user }) => {
+      console.log("Verification Email queued for:", user.email);
     }
   },
   socialProviders: {
