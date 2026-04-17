@@ -25,6 +25,7 @@ describe("Security posture docs", () => {
     expect(content).toContain("/sign-in/email: 10 requests per 60 seconds");
     expect(content).toContain("/sign-up/email: 5 requests per 60 seconds");
     expect(content).toContain("/forget-password: 3 requests per 60 seconds");
+    expect(content).toContain("/request-password-reset: 3 requests per 60 seconds");
     expect(content).toContain("/reset-password: 3 requests per 60 seconds");
     expect(content).toContain("/send-verification-email: 3 requests per 60 seconds");
     expect(content).toContain("/get-session: 120 requests per 60 seconds");
@@ -62,6 +63,7 @@ describe("Security posture docs", () => {
     expect(content).toContain("RATE_LIMITED - Too many requests");
     expect(content).toContain("INTERNAL_ERROR - Internal server error");
     expect(content).toContain("Detailed diagnostics are server logs only");
+    expect(content).toContain("Redirect-style OAuth and password-reset errors are redacted before reaching clients");
   });
 
   it("README links to security posture", () => {

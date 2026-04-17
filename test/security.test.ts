@@ -88,6 +88,7 @@ describe("Rate limit policy", () => {
       "/sign-in/email": { window: 60, max: 10 },
       "/sign-up/email": { window: 60, max: 5 },
       "/forget-password": { window: 60, max: 3 },
+      "/request-password-reset": { window: 60, max: 3 },
       "/reset-password": { window: 60, max: 3 },
       "/send-verification-email": { window: 60, max: 3 },
       "/get-session": { window: 60, max: 120 },
@@ -163,6 +164,34 @@ describe("Auth error redaction", () => {
     );
 
     expect(response.status).toBe(400);
+    await expectSafeBody(response, "INVALID_RESET_LINK", "Invalid or expired reset link", sensitiveTerms);
+  });
+
+  it("returns generic OAuth redirect errors", async () => {
+    const response = await redactAuthErrorResponse(
+      new Request("http://localhost:3000/api/auth/callback/google"),
+      new Response(null, { 
+        status: 302, 
+        headers: { Location: "https://provider.example/callback?token=provider-secret&error_description=google-detail" } 
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("location")).toBeNull();
+    await expectSafeBody(response, "AUTHENTICATION_FAILED", "Authentication failed", sensitiveTerms);
+  });
+
+  it("returns generic reset-password redirect errors", async () => {
+    const response = await redactAuthErrorResponse(
+      new Request("http://localhost:3000/api/auth/reset-password?token=fake-expired-token"),
+      new Response(null, { 
+        status: 303, 
+        headers: { Location: "http://localhost:3001/reset?token=fake-expired-token&error=expired" } 
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("location")).toBeNull();
     await expectSafeBody(response, "INVALID_RESET_LINK", "Invalid or expired reset link", sensitiveTerms);
   });
 

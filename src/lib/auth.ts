@@ -42,14 +42,22 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     minPasswordLength: 8,
-    sendResetPassword: async ({ user }) => {
+    sendResetPassword: async ({ user, url }) => {
+      if (env.NODE_ENV !== "production") {
+        console.log("Password Reset Email:", user.email, url);
+        return;
+      }
       console.log("Password Reset Email queued for:", user.email);
     }
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user }) => {
+    sendVerificationEmail: async ({ user, url }) => {
+      if (env.NODE_ENV !== "production") {
+        console.log("Verification Email:", user.email, url);
+        return;
+      }
       console.log("Verification Email queued for:", user.email);
     }
   },

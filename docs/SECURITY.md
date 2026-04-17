@@ -10,6 +10,7 @@ Better Auth rate limiting is enabled with database-backed storage, not per-proce
 - /sign-in/email: 10 requests per 60 seconds
 - /sign-up/email: 5 requests per 60 seconds
 - /forget-password: 3 requests per 60 seconds
+- /request-password-reset: 3 requests per 60 seconds
 - /reset-password: 3 requests per 60 seconds
 - /send-verification-email: 3 requests per 60 seconds
 - /get-session: 120 requests per 60 seconds
@@ -38,6 +39,8 @@ Public auth error responses use these approved codes and messages:
 - INTERNAL_ERROR - Internal server error
 
 OAuth provider details, password reset token state, database errors, SQL constraints, and stack traces are not returned to clients. Detailed diagnostics are server logs only.
+
+Redirect-style OAuth and password-reset errors are redacted before reaching clients, including Location headers and token-bearing URLs.
 
 ## Consumer checklist
 

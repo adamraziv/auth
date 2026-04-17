@@ -16,6 +16,7 @@ export const rateLimit = {
     "/sign-in/email": { window: 60, max: 10 },
     "/sign-up/email": { window: 60, max: 5 },
     "/forget-password": { window: 60, max: 3 },
+    "/request-password-reset": { window: 60, max: 3 },
     "/reset-password": { window: 60, max: 3 },
     "/send-verification-email": { window: 60, max: 3 },
     "/get-session": { window: 60, max: 120 },
@@ -46,6 +47,19 @@ export const publicAuthErrors = {
 } as const;
 
 export async function redactAuthErrorResponse(request: Request, response: Response): Promise<Response> {
+  const pathname = new URL(request.url).pathname;
+
+  // Redact OAuth and password-reset errors (4xx) and redirects (3xx) to JSON
+  // But do not redact 404 - let non-existent routes pass through
+  if (isOAuthErrorPath(pathname) && response.status >= 300 && response.status < 500 && response.status !== 404) {
+    return redactedJson(response, publicAuthErrors.authenticationFailed, response.status >= 300 && response.status < 400 ? 400 : response.status);
+  }
+
+  if (isPasswordResetErrorPath(pathname) && response.status >= 300 && response.status < 500 && response.status !== 404) {
+    return redactedJson(response, publicAuthErrors.invalidResetLink, response.status >= 300 && response.status < 400 ? 400 : response.status);
+  }
+
+  // Pass through non-error responses
   if (response.status < 400) {
     return response;
   }
@@ -56,16 +70,6 @@ export async function redactAuthErrorResponse(request: Request, response: Respon
 
   if (response.status >= 500) {
     return redactedJson(response, publicAuthErrors.internalError, response.status);
-  }
-
-  const pathname = new URL(request.url).pathname;
-
-  if (isOAuthErrorPath(pathname)) {
-    return redactedJson(response, publicAuthErrors.authenticationFailed, response.status);
-  }
-
-  if (isPasswordResetErrorPath(pathname)) {
-    return redactedJson(response, publicAuthErrors.invalidResetLink, response.status);
   }
 
   return response;
@@ -100,5 +104,6 @@ function redactedJson(
 function copyHeadersWithoutContentLength(source: Headers) {
   const headers = new Headers(source);
   headers.delete("content-length");
+  headers.delete("location");
   return headers;
 }
