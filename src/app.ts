@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { openAPI } from "better-auth/plugins";
 
 import { auth } from "./lib/auth.js";
 import { corsOrigins, redactAuthErrorResponse } from "./lib/security.js";
@@ -94,9 +93,6 @@ function transformOpenAPISchema(schema: any) {
     tags
   };
 }
-
-const openAPIDoc = openAPI({ path: "/api/auth/reference" });
-const { openAPIReference } = openAPIDoc.endpoints;
 
 const app = new Hono<{ Variables: AppVariables }>();
 
