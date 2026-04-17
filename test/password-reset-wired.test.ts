@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("pg", () => {
+  const query = vi.fn().mockResolvedValue({ rows: [] });
+  const connect = vi.fn().mockResolvedValue({ query, release: vi.fn() });
+
   const PoolMock = vi.fn(function(this: any) {
-    this.query = vi.fn().mockResolvedValue({ rows: [] });
-    this.connect = vi.fn().mockResolvedValue({ release: vi.fn() });
+    this.query = query;
+    this.connect = connect;
     this.on = vi.fn();
     this.end = vi.fn();
   });
@@ -16,11 +19,16 @@ vi.mock("pg", () => {
 
 import { app } from "../src/app.js";
 
+const origin = "http://localhost:3001";
+
 describe("Password reset routes are wired", () => {
   it("returns 200 with generic success payload for POST /api/auth/request-password-reset", async () => {
     const res = await app.request("/api/auth/request-password-reset", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Origin: origin
+      },
       body: JSON.stringify({ email: "test@example.com" })
     });
 
@@ -36,7 +44,10 @@ describe("Password reset routes are wired", () => {
   it("returns a 400-series error for POST /api/auth/reset-password without token", async () => {
     const res = await app.request("/api/auth/reset-password", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Origin: origin
+      },
       body: JSON.stringify({ newPassword: "newpassword" })
     });
 
@@ -48,13 +59,19 @@ describe("Password reset routes are wired", () => {
   it("uses current Better Auth route paths and rejects obsolete reset paths", async () => {
     const obsoleteRequestPath = await app.request("/api/auth/reset-password/request", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Origin: origin
+      },
       body: JSON.stringify({ email: "test@example.com" })
     });
 
     const obsoleteVerifyPath = await app.request("/api/auth/reset-password/verify", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Origin: origin
+      },
       body: JSON.stringify({ token: "dummy-token" })
     });
 
