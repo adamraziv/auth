@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { openAPI, passwordReset } from "better-auth/plugins";
+import { openAPI } from "better-auth/plugins";
 
 import { pool } from "./db.js";
 import { env } from "./env.js";
@@ -60,7 +60,6 @@ export const auth = betterAuth({
     }
   },
   plugins: [
-    openAPI(),
-    passwordReset()
+    openAPI()
   ]
 });
