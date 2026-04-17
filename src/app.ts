@@ -148,7 +148,7 @@ app.get("/api/auth/reference", async (c) => {
       }
       document.getElementById('api-reference').dataset.configuration = JSON.stringify(configuration)
     <\/script>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.27.6"><\/script>
   </body>
 </html>`;
   return c.body(html, {
